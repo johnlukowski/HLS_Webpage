@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!--    Title:              HLS_Test_Player.htm
+        Associated Files:   
+        Author:             John Lukowski (https://github.com/johnlukowski)
+        Created:            10/26/2020
+        Edited:             11/3/2020
+-->
+
+<head>
+    <meta charset='UTF-8'>
+    <title>HLS Test Player</title>
+</head>
+<body style="background-color:#FFCCCC;">
+    <center>
+        <H1>HLS Test Player</H1>
+        <br>
+        <p>
+            Simple player using video-js
+        </p>
+        <br>
+        <label for="stream">Stream Url:</label>
+        <input type="text" id="stream" name="stream" size="120" placeholder="https://SERVER:8443/live/STREAMKEY/index.m3u8">
+        <br>
+        <button onclick="resetStream()">Pull Stream</button>
+        <br>
+        <br>
+        <br>
+    </center>
+</body>
+
+
+
+<!-- Everything below this is the player -->
+
+
+
+<!-- This goes in the header (supposed to, could go just above player code) -->
+<!-- Imports the videojs player -->
+<head>
+    <link href="https://vjs.zencdn.net/7.8.4/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+</head>
+
+<!-- This is where the player is on the page, the video and script can be put anywhere in your HTML-->
+<style>
+    .bordered{
+        border: 1px solid black;
+    }
+</style>
+<body>
+    <center>
+        <video
+            id="my-video"
+            class="video-js vjs-big-play-centered bordered"
+            controls
+            preload
+            autoplay
+            width="640"
+            height="360"
+            poster="https://static.wixstatic.com/media/e51675_eb536717f3f34a898fa3055ce6e6d94e~mv2.png/v1/fill/w_1200,h_630,al_c/e51675_eb536717f3f34a898fa3055ce6e6d94e~mv2.png"
+            data-setup="{}"
+        >
+            <source src="https://SERVER:8443/live/STREAMKEY/index.m3u8" type="application/x-mpegURL" />
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a
+                web browser that
+                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
+        </video>
+
+        <script src="https://vjs.zencdn.net/7.8.4/video.js"></script>
+    </center>
+</body>
+
+<!-- This is the javascript for the player, can go anywhere -->
+<script>
+    var player = videojs('my-video')
+    // Using the input field to pull the source. In a static player would set this, and set the source in the player html
+    // Would also need to change every src: below to src:source
+    // var source = player.src()
+    var resetting = false
+    var disconnects = 0
+
+    // Reconnect to stream
+    function resetStream(){
+        player.src({src:document.getElementById("stream").value, type:"application/x-mpegURL"});
+        resetting = false
+    }
+
+    // Poll the player state to reconnect if needed
+    setInterval(playState, 2000)
+    function playState(){
+        if(!player.paused() && (player.readyState()<3 || player.networkState() != 2)){
+            if(!resetting){
+                resetting = true
+                setTimeout(resetStream, 2000)
+            }
+        }
+    }
+
+    // Hide the error popup on failed stream connect
+    player.on("error", function(){
+        player.error(null)
+    })
+
+    // Attempt to play if autoplay setting fails
+    player.ready(function() {
+        player.src({src:document.getElementById("stream").value, type:"application/x-mpegURL"});
+        var promise = player.play()
+
+        if (promise !== undefined){
+            promise.then(function(){
+                // Play Worked
+            }).catch(function(error){
+                // Play Failed
+            })
+        }
+    })
+</script>
