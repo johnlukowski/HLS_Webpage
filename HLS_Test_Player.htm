@@ -13,18 +13,24 @@
 <body style="background-color:#FFCCCC;">
     <center>
         <H1>HLS Test Player</H1>
-        <br>
-        <p>
+        
+        <p style="padding-bottom:1ex; padding-top:1ex">
             Simple player using video-js
         </p>
-        <br>
-        <label for="stream">Stream Url:</label>
+
+        <label for="stream">
+            Stream Url:
+        </label>
+
         <input type="text" id="stream" name="stream" size="120" placeholder="https://SERVER:8443/live/STREAMKEY/index.m3u8">
-        <br>
-        <button onclick="resetStream()">Pull Stream</button>
-        <br>
-        <br>
-        <br>
+        
+        <p style="padding-bottom:.25ex"></p>
+
+        <button onclick="resetStream()">
+            Pull Stream
+        </button>
+
+        <p style="padding-bottom:4ex"/p>
     </center>
 </body>
 
@@ -81,10 +87,11 @@
     var resetting = false
     var disconnects = 0
 
+    // Fill in the input field with default
     if(document.getElementById("stream").value==""){
         document.getElementById("stream").value = "https://SERVER:8443/live/STREAMKEY/index.m3u8"
     }
-    
+
     // Reconnect to stream
     function resetStream(){
         player.src({src:document.getElementById("stream").value, type:"application/x-mpegURL"});
@@ -101,6 +108,14 @@
             }
         }
     }
+
+    // If a non-stream was viewed, reset the playre at the end
+    player.on("ended", function(){
+        if(!resetting){
+            resetting = true
+            setTimeout(resetStream, 2000)
+        }
+    })
 
     // Hide the error popup on failed stream connect
     player.on("error", function(){
