@@ -81,6 +81,10 @@
     var resetting = false
     var disconnects = 0
 
+    if(document.getElementById("stream").value==""){
+        document.getElementById("stream").value = "https://SERVER:8443/live/STREAMKEY/index.m3u8"
+    }
+    
     // Reconnect to stream
     function resetStream(){
         player.src({src:document.getElementById("stream").value, type:"application/x-mpegURL"});
